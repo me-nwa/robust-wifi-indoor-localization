@@ -1,0 +1,14 @@
+Characteristic,Value
+Training Samples,19937.0
+Validation Samples,1111.0
+Original Columns,529.0
+WiFi AP Features,520.0
+Buildings,3.0
+Floors,5.0
+Building-Floor Classes,13.0
+RSSI Minimum,-104.0
+RSSI Maximum,100.0
+Undetected AP Values,10008477.0
+Undetected AP Percentage,96.5394550526466
+Training NaN Values,0.0
+Validation NaN Values,0.0

@@ -1,0 +1,103 @@
+
+DEN702 FINAL EXPERIMENTAL RESULTS
+================================
+
+DATASET
+-------
+Training fingerprints: 19,937
+Held-out final-test fingerprints: 1,111
+Wi-Fi access-point features: 520
+Building-floor classes: 13
+Undetected AP proportion: 96.54%
+
+FINAL CLASSIFICATION
+--------------------
+Clean condition:
+Clean-trained MLP accuracy:
+0.9109
+
+AP-dropout-trained MLP accuracy:
+0.9055
+
+Difference:
+-0.0054
+
+95% bootstrap CI:
+[-0.0180,
+ 0.0063]
+
+
+Severe condition:
+50% detected-AP loss + RSSI noise sigma=10 dB
+
+Clean-trained MLP accuracy:
+0.6853
+
+AP-dropout-trained MLP accuracy:
+0.7424
+
+Accuracy improvement:
+0.0571
+
+Accuracy improvement in percentage points:
+5.71
+
+95% bootstrap CI:
+[0.0441,
+ 0.0706]
+
+
+FINAL LOCALIZATION
+------------------
+Clean condition:
+
+Clean-trained MLP mean error:
+12.0538
+
+Combined-training MLP mean error:
+10.1136
+
+Error reduction:
+1.9402
+
+95% bootstrap CI:
+[1.4704,
+ 2.4083]
+
+
+Severe condition:
+50% detected-AP loss + RSSI noise sigma=10 dB
+
+Clean-trained MLP mean error:
+30.1632
+
+Combined-training MLP mean error:
+15.2405
+
+Absolute error reduction:
+14.9227
+
+Relative error reduction:
+49.47%
+
+95% bootstrap CI:
+[14.2087,
+ 15.6291]
+
+
+FULL 24-CONDITION GRID
+----------------------
+Classification:
+Clean training mean accuracy:
+0.8218
+
+AP-dropout training mean accuracy:
+0.8483
+
+
+Localization:
+Clean training mean error:
+18.5953
+
+Combined training mean error:
+11.9318

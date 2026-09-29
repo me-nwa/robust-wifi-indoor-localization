@@ -1,0 +1,14 @@
+\begin{table}
+\caption{Final held-out evaluation comparing clean and robustness-oriented training.}
+\label{tab:final_statistics}
+\begin{tabular}{llrrrl}
+\toprule
+Task & Condition & Baseline & Robust & Improvement & 95\% CI \\
+\midrule
+Classification & Clean & 0.9109 & 0.9055 & -0.0054 & [-0.0180, 0.0063] \\
+Classification & 50\% AP Loss + sigma=10 & 0.6853 & 0.7424 & 0.0571 & [0.0441, 0.0706] \\
+Localization & Clean & 12.0538 & 10.1136 & 1.9402 & [1.4704, 2.4083] \\
+Localization & 50\% AP Loss + sigma=10 & 30.1632 & 15.2405 & 14.9227 & [14.2087, 15.6291] \\
+\bottomrule
+\end{tabular}
+\end{table}

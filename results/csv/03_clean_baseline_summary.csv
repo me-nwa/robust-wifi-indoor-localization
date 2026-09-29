@@ -1,0 +1,3 @@
+Task,Best_Model,Primary_Metric,Primary_Value,Secondary_Metric,Secondary_Value
+Building-Floor Classification,Random Forest,Macro F1,0.9958875528397603,Accuracy,0.9964894684052157
+Coordinate Localization,KNN,Mean Localization Error,3.126195869386965,Median Localization Error,1.1448363323195236

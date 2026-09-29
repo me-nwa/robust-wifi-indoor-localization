@@ -1,0 +1,15 @@
+Type,File,Purpose
+Figure,fig_ap_loss_classification.pdf,AP-loss baseline comparison
+Figure,fig_rssi_noise_classification.pdf,RSSI-noise baseline comparison
+Figure,fig_final_classification_robustness.pdf,Final classification robustness
+Figure,fig_final_localization_robustness.pdf,Final localization robustness
+Figure,fig_accuracy_improvement_heatmap.pdf,Classification improvement heatmap
+Figure,fig_localization_error_reduction_heatmap.pdf,Localization improvement heatmap
+Figure,fig_classification_bootstrap_effect.pdf,Classification bootstrap effect
+Figure,fig_localization_bootstrap_effect.pdf,Localization bootstrap effect
+Table,table_dataset_characteristics.tex,Dataset characteristics
+Table,table_clean_classification_baselines.tex,Classification baselines
+Table,table_clean_localization_baselines.tex,Localization baselines
+Table,table_final_statistical_results.tex,Final statistical results
+Table,table_classification_grid_summary.tex,Classification robustness grid
+Table,table_localization_grid_summary.tex,Localization robustness grid

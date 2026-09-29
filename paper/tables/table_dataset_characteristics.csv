@@ -1,0 +1,8 @@
+Characteristic,Value
+Training fingerprints,19937.0
+Official validation/test fingerprints,1111.0
+Wi-Fi access-point features,520.0
+Buildings,3.0
+Floors,5.0
+Building-floor classes,13.0
+Undetected AP values (%),96.54

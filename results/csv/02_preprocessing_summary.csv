@@ -1,0 +1,18 @@
+Setting,Value
+Original Training Samples,19937
+Training Samples,15949
+Development Samples,3988
+Final Test Samples,1111
+WiFi Features,520
+Building-Floor Classes,13
+Missing AP Original Marker,100
+Missing AP Experimental Representation,-110
+Average Detected APs Per Training Fingerprint,17.994833726237648
+Median Detected APs Per Training Fingerprint,17.0
+Minimum Detected APs Per Training Fingerprint,0
+Maximum Detected APs Per Training Fingerprint,51
+Train Split Percentage,80
+Development Split Percentage,20
+Random State,42
+Scaler,MinMaxScaler
+Scaler Fit Data,Training subset only
