@@ -1,0 +1,50 @@
+{
+  "experiment": "Reviewer-requested extended robustness analysis",
+  "post_hoc": true,
+  "evaluation_seed_count": 20,
+  "evaluation_seeds": [
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60,
+    61
+  ],
+  "severe_condition": {
+    "ap_loss": 0.5,
+    "sigma_db": 10.0
+  },
+  "global_ap_outage_levels": [
+    0.1,
+    0.3,
+    0.5
+  ],
+  "global_outage_noise_levels": [
+    0.0,
+    10.0
+  ],
+  "bootstrap_repetitions": 5000,
+  "bootstrap_seed": 13042,
+  "bootstrap_procedure": "Hierarchical paired bootstrap: resample the 20 corruption seeds with replacement; within each selected seed resample the 1111 fingerprints with replacement; compute the paired mean robust-minus-baseline correctness or baseline-minus-robust localization error.",
+  "model_inputs": "Only scaled RSSI features are model inputs. Observation masks are used only to determine which AP measurements may be corrupted.",
+  "python_version": "3.11.16 (main, Aug 12 2026, 23:03:19) [Clang 21.0.0 (clang-2100.1.1.101)]",
+  "numpy_version": "2.4.6",
+  "pandas_version": "3.0.6",
+  "sklearn_version": "1.9.1",
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "cpu_count": 14
+}
