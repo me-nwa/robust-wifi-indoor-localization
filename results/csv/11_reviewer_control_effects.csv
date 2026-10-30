@@ -1,0 +1,3 @@
+Comparison,Task,Severe_Control_Effect
+AP Dropout vs Equal-Volume Repeated Clean,Classification,0.04860486048604862
+Combined vs Equal-Volume Repeated Clean,Localization,16.424471945130925

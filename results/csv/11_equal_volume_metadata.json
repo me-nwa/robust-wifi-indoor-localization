@@ -1,0 +1,53 @@
+{
+  "experiment": "Reviewer-requested equal-volume augmentation control",
+  "post_hoc": true,
+  "random_state": 42,
+  "original_training_samples": 15949,
+  "model_fit_samples": 14354,
+  "early_stop_samples": 1595,
+  "augmentation_seeds": [
+    142,
+    242
+  ],
+  "evaluation_seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "max_epochs": 300,
+  "patience": 15,
+  "mlp_parameters": {
+    "hidden_layer_sizes": [
+      128,
+      64
+    ],
+    "activation": "relu",
+    "solver": "adam",
+    "alpha": 0.0001,
+    "batch_size": 200,
+    "learning_rate": "constant",
+    "learning_rate_init": 0.001,
+    "power_t": 0.5,
+    "shuffle": true,
+    "random_state": 42,
+    "tol": 0.0001,
+    "momentum": 0.9,
+    "nesterovs_momentum": true,
+    "early_stopping": false,
+    "validation_fraction": 0.1,
+    "beta_1": 0.9,
+    "beta_2": 0.999,
+    "epsilon": 1e-08,
+    "n_iter_no_change": 15,
+    "max_iter": 1
+  },
+  "missing_original": 100,
+  "missing_rssi": -110.0,
+  "rssi_clip": [
+    -104.0,
+    0.0
+  ],
+  "note": "Explicit early-stopping split was created before augmentation. Augmented copies of fit fingerprints cannot enter the fixed stopping set."
+}
