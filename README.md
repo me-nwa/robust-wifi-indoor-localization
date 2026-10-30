@@ -1,663 +1,147 @@
-# Robust Wi-Fi Fingerprint-Based Indoor Localization Under Access-Point Loss and RSSI Noise
+<div align="center">
 
-![Python](https://img.shields.io/badge/Python-3.11-blue)
-![Jupyter](https://img.shields.io/badge/Jupyter-Notebooks-orange)
-![scikit-learn](https://img.shields.io/badge/scikit--learn-ML-yellow)
-![Research](https://img.shields.io/badge/Research-Reproducible-success)
-![Status](https://img.shields.io/badge/Status-Experimental%20Pipeline%20Frozen-green)
+# Robust Wi-Fi Fingerprint Indoor Localization
 
-A reproducible machine-learning study investigating the robustness of
-Wi-Fi fingerprint-based indoor localization under **access-point (AP) loss**
-and **RSSI measurement noise**.
+### Under Access-Point Loss and RSSI Noise
 
-The study evaluates classical and neural machine-learning models under
-controlled Wi-Fi degradation and investigates whether
-**AP-dropout and RSSI-noise augmentation during training** can improve
-robustness.
+[![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![scikit-learn 1.9](https://img.shields.io/badge/scikit--learn-1.9-F7931E?logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
+[![Jupyter](https://img.shields.io/badge/Jupyter-notebooks-F37626?logo=jupyter&logoColor=white)](https://jupyter.org/)
+[![Dataset: UJIIndoorLoc](https://img.shields.io/badge/Dataset-UJIIndoorLoc-4C8BF5)](https://archive.ics.uci.edu/dataset/310/ujiindoorloc)
+[![Paper: under review](https://img.shields.io/badge/Paper-under%20review-8A2BE2)](#citation)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-The experiments use the **UJIIndoorLoc** benchmark and evaluate both:
+**How do Wi-Fi localization models fail when access points disappear, and can simple
+corruption-aware training make them degrade gracefully?**
 
-- **Building-floor classification**
-- **Coordinate localization**
+[Key results](#key-results) · [Method](#method-at-a-glance) · [Quick start](#quick-start) ·
+[Notebooks](#notebook-guide) · [Reproducibility](#reproducibility-protocol) · [Citation](#citation)
 
-The final models are evaluated using a held-out test set that was not used
-for model selection or hyperparameter tuning.
+</div>
 
 ---
 
-## Research Overview
+## Overview
 
-Wi-Fi fingerprint-based indoor localization can achieve strong performance
-under clean conditions, but real-world Wi-Fi environments are dynamic.
+Wi-Fi fingerprinting localizes a device from the signal strengths (RSSI) of nearby access points (APs).
+It works well on clean benchmark data, but in real buildings APs go offline and readings fluctuate.
+This repository contains the complete, auditable pipeline behind our study of those two failure modes
+on the public **UJIIndoorLoc** benchmark (3 buildings, 13 building-floor classes, 520 APs):
 
-Access points may:
+- **Two tasks:** building-floor classification and 2-D coordinate localization.
+- **Three model families:** K-nearest neighbors, Random Forest and a multilayer perceptron (MLP).
+- **A 6 × 4 corruption grid:** loss of 0–50 % of the APs *actually observed* in each fingerprint, crossed
+  with Gaussian RSSI noise of σ = 0, 2, 5 and 10 dB.
+- **Corruption-aware training:** AP-dropout, RSSI-noise and combined augmentation.
+- **A frozen held-out test set** (1,111 fingerprints), never used for model selection, with paired-bootstrap
+  confidence intervals.
 
-- disappear,
-- become temporarily unavailable,
-- change signal strength,
-- experience interference,
-- or produce noisy RSSI measurements.
-
-A model that performs well on clean fingerprints may therefore experience
-substantial degradation after deployment.
-
-This project systematically evaluates these effects and investigates
-robustness-oriented training strategies.
-
----
-
-## Main Research Questions
-
-**RQ1.** How does increasing Wi-Fi access-point loss affect indoor
-localization performance?
-
-**RQ2.** How does RSSI measurement noise affect indoor localization
-performance?
-
-**RQ3.** Can AP-dropout and RSSI-noise augmentation during training improve
-robustness?
-
-**RQ4.** Which evaluated machine-learning models maintain stronger
-performance under degraded Wi-Fi conditions?
-
----
-
-## Research Hypothesis
-
-> Models trained using simulated access-point loss and RSSI perturbation
-> will exhibit lower performance degradation under corrupted Wi-Fi
-> conditions than models trained only on clean Wi-Fi fingerprints.
-
----
-
-# Key Findings
-
-The experiments show that **access-point loss is substantially more
-disruptive than RSSI noise alone**.
-
-Robustness-oriented training improves performance particularly when the
-Wi-Fi environment becomes heavily degraded.
+> [!IMPORTANT]
+> **Main finding.** Losing access points is far more damaging than RSSI noise. Training on fingerprints with
+> randomly dropped APs recovers a large part of the lost performance, and the benefit is not explained by the
+> extra training data.
 
 <p align="center">
-  <img
-    src="results/figures/08_final_severe_classification.png"
-    alt="Final severe-condition classification comparison"
-    width="700"
-  >
+  <img src="results/figures/08_final_severe_classification.png" alt="Severe-condition classification: clean vs AP-dropout training" width="48%">
+  &nbsp;
+  <img src="results/figures/08_final_severe_localization.png" alt="Severe-condition localization: clean vs combined augmentation" width="48%">
 </p>
-
-<p align="center">
-  <em>
-    Final held-out classification performance under
-    50% AP loss and RSSI noise σ = 10 dB.
-  </em>
-</p>
+<p align="center"><sub>Held-out performance under the severe condition: 50 % detected-AP loss plus σ = 10 dB RSSI noise.</sub></p>
 
 ---
 
-## Final Held-Out Classification Results
+## Key results
 
-Under the severe test condition:
+### Primary analysis (frozen held-out test set)
 
-**50% detected-AP loss + Gaussian RSSI noise σ = 10 dB**
+Severe condition: **50 % detected-AP loss + σ = 10 dB RSSI noise**, five corruption seeds.
 
-| Training strategy | Accuracy |
-|---|---:|
-| Clean-trained MLP | **68.53%** |
-| AP-dropout-trained MLP | **74.24%** |
-| Improvement | **+5.71 percentage points** |
-
-The paired hierarchical bootstrap analysis produced:
-
-**95% confidence interval: +4.41 to +7.06 percentage points**
-
-The interval excludes zero, providing evidence that the improvement is
-consistent under the evaluated corruption process.
-
-### Clean-condition trade-off
-
-| Training strategy | Accuracy |
-|---|---:|
-| Clean-trained MLP | **91.09%** |
-| AP-dropout-trained MLP | **90.55%** |
-| Difference | **−0.54 percentage points** |
-
-The clean-condition difference had a 95% bootstrap confidence interval of:
-
-**−1.80 to +0.63 percentage points**
-
-This indicates that the robustness improvement was achieved with only a
-small clean-condition classification trade-off.
-
----
-
-# Final Localization Results
-
-For coordinate localization, the strongest robustness strategy used
-**combined AP-dropout and RSSI-noise augmentation**.
-
-Under the severe condition:
-
-**50% detected-AP loss + Gaussian RSSI noise σ = 10 dB**
-
-| Training strategy | Mean localization error |
-|---|---:|
-| Clean-trained MLP | **30.1632** |
-| Combined-augmentation MLP | **15.2405** |
-| Absolute reduction | **14.9227** |
-| Relative reduction | **≈ 49.5%** |
-
-> Localization errors are reported in **dataset coordinate units**.
-> No unsupported conversion to physical meters is assumed.
-
-<p align="center">
-  <img
-    src="results/figures/08_final_severe_localization.png"
-    alt="Final severe-condition localization comparison"
-    width="700"
-  >
-</p>
-
-<p align="center">
-  <em>
-    Mean localization error under severe combined degradation.
-  </em>
-</p>
-
----
-
-# Robustness Across the Full Evaluation Grid
-
-The final robustness evaluation contains:
-
-- **6 AP-loss levels**
-- **4 RSSI-noise levels**
-- **24 combined corruption conditions**
-- **5 stochastic corruption seeds**
-
-AP-loss levels:
-
-```text
-0%, 10%, 20%, 30%, 40%, 50%
-```
-
-RSSI Gaussian noise:
-
-```text
-σ = 0, 2, 5, 10 dB
-```
-
-### Classification
-
-Across all 24 conditions:
-
-| Training regime | Mean accuracy | Mean Macro F1 | Minimum accuracy | Maximum accuracy |
+| Task | Clean-trained MLP | Robust MLP | Improvement | 95 % CI |
 |---|---:|---:|---:|---:|
-| Clean | 0.8218 | 0.8085 | 0.6853 | 0.9122 |
-| AP Dropout | **0.8483** | **0.8361** | **0.7424** | 0.9055 |
+| Building-floor accuracy (AP-dropout) | 68.53 % | **74.24 %** | **+5.71 pp** | [+4.41, +7.06] pp |
+| Mean localization error (combined) | 30.16 | **15.24** | **−49.5 %** | [14.21, 15.63] units reduction |
+| Clean-input accuracy (AP-dropout) | 91.09 % | 90.55 % | −0.54 pp | [−1.80, +0.63] pp |
 
-### Localization
+Across all 24 grid conditions, AP-dropout training raised mean accuracy from 0.822 to 0.848, and combined
+augmentation cut mean localization error from 18.60 to 11.93 coordinate units.
 
-Across all 24 conditions:
+### Reviewer-requested controls (post-hoc)
 
-| Training regime | Mean error | Median-condition error | Minimum error | Maximum error |
-|---|---:|---:|---:|---:|
-| Clean | 18.5953 | 16.9085 | 12.0538 | 30.1632 |
-| Combined augmentation | **11.9318** | **11.6042** | **10.1136** | **15.2405** |
+These analyses were added during peer review, after the primary test evaluation was frozen. They test
+specific threats to interpretation and were **not** used to change model selection.
 
----
+| Question | Control | Result (severe condition) |
+|---|---|---|
+| Is the gain just more training data? | Repeated-clean model trained on the **same number of instances** (43,062) | AP-dropout still **+4.86 pp** accuracy; combined still **−16.42 units (−50.1 %)** error |
+| Is it specific to the MLP? | Same augmentation applied to **Random Forest** | **+11.18 pp** accuracy; **−21.15 units (−54.6 %)** error |
+| Are five seeds enough? | **20 corruption seeds** (42–61) | MLP **+5.20 pp** / **−16.28 units**; RF **+11.25 pp** / **−21.07 units** |
+| Does it hold for shared outages? | **Global AP outage**: the same APs removed from every fingerprint | At 50 % outage: **+5.42 pp** (no noise), **+4.36 pp** (σ = 10 dB) for the MLP |
 
-## Robustness Heatmap
-
-<p align="center">
-  <img
-    src="results/figures/08_final_accuracy_improvement_heatmap.png"
-    alt="Accuracy improvement heatmap"
-    width="760"
-  >
-</p>
+Confidence intervals for the 20-seed analysis are reported in the paper (Table 10).
 
 <p align="center">
-  <em>
-    Improvement from robustness-oriented training across
-    AP-loss and RSSI-noise conditions.
-  </em>
+  <img src="results/figures/11_equal_volume_severe_classification.png" alt="Equal-volume control: classification" width="48%">
+  &nbsp;
+  <img src="results/figures/12_rf_severe_classification.png" alt="Random Forest augmentation: classification" width="48%">
 </p>
+<p align="center"><sub>Left: equal-volume control (MLP). Right: Random Forest with augmentation.</sub></p>
 
-Additional figures are available in:
-
-```text
-results/figures/
-```
-
----
-
-# Dataset
-
-This study uses the **UJIIndoorLoc** Wi-Fi fingerprinting benchmark.
-
-Dataset characteristics used in this project:
-
-| Characteristic | Value |
-|---|---:|
-| Official training fingerprints | 19,937 |
-| Held-out final-test fingerprints | 1,111 |
-| Wi-Fi AP features | 520 |
-| Buildings | 3 |
-| Floors | 5 |
-| Building-floor classes | 13 |
-| Undetected AP proportion | 96.54% |
-| Average observed APs per fingerprint | ≈ 18 |
-
-The original dataset represents undetected access points using the value
-`100`.
-
-For model input, this project converts undetected APs to:
-
-```text
--110 dBm
-```
-
-while preserving an explicit observed-AP mask.
-
-This distinction is important because corruption is applied only to APs that
-were originally observed.
+> [!NOTE]
+> Localization errors are in **dataset coordinate units**, the planar coordinates supplied with UJIIndoorLoc.
+> They have not been converted to verified meters, so a 16-unit reduction is not a 16 m improvement.
 
 ---
 
-# Experimental Design
+## Method at a glance
 
-The experimental pipeline follows the structure below:
-
-```text
-                    UJIIndoorLoc
-                         │
-                         ▼
-                Dataset Exploration
-                         │
-                         ▼
-                   Preprocessing
-                         │
-              ┌──────────┴──────────┐
-              │                     │
-              ▼                     ▼
-     Building-Floor            Coordinate
-      Classification          Localization
-              │                     │
-              └──────────┬──────────┘
-                         │
-                         ▼
-                 Clean Baselines
-                KNN / RF / MLP
-                         │
-          ┌──────────────┼──────────────┐
-          │              │              │
-          ▼              ▼              ▼
-       AP Loss       RSSI Noise      Combined
-      Evaluation      Evaluation     Degradation
-          │              │              │
-          └──────────────┼──────────────┘
-                         │
-                         ▼
-                 Robust Training
-             ┌───────────┼───────────┐
-             │           │           │
-             ▼           ▼           ▼
-         AP Dropout   RSSI Noise    Combined
-         Training     Training      Training
-             │           │           │
-             └───────────┼───────────┘
-                         │
-                         ▼
-                Ablation Analysis
-                         │
-                         ▼
-              Held-Out Final Test
-                         │
-                         ▼
-            Bootstrap Statistical
-                   Analysis
-                         │
-                         ▼
-                 Final Results
+```mermaid
+flowchart LR
+    A[UJIIndoorLoc<br/>19,937 train · 1,111 test] --> B[Preprocessing<br/>100 → −110 dBm<br/>MinMax on train only]
+    B --> C[Stratified split<br/>15,949 train · 3,988 dev]
+    C --> D[Clean baselines<br/>KNN · RF · MLP]
+    D --> E[Corruption grid<br/>6 AP-loss × 4 noise levels]
+    E --> F[Robust training<br/>AP-dropout · noise · combined]
+    F --> G[Select on dev only]
+    G --> H[Frozen held-out test<br/>+ paired bootstrap]
+    H -.post-hoc.-> I[Reviewer controls<br/>equal volume · RF · 20 seeds · global outage]
 ```
 
----
+**Corruption operators** (applied in dBm space, before scaling)
 
-# Machine-Learning Models
-
-Three model families are evaluated.
-
-## K-Nearest Neighbors
-
-```text
-n_neighbors = 5
-weights = distance
-```
-
-KNN provides a strong fingerprint-matching baseline.
-
----
-
-## Random Forest
-
-```text
-n_estimators = 300
-random_state = 42
-```
-
-Random Forest provides a nonlinear ensemble baseline and demonstrated
-strong resilience under AP-loss-only classification.
-
----
-
-## Multilayer Perceptron
-
-Architecture:
-
-```text
-Input
-  ↓
-128 hidden units
-  ↓
-64 hidden units
-  ↓
-Output
-```
-
-Configuration:
-
-```text
-Activation: ReLU
-Optimizer: Adam
-Maximum iterations: 300
-Early stopping: enabled
-Random state: 42
-```
-
-MLP was used for the final robustness-training experiments.
-
----
-
-# Corruption Models
-
-## Access-Point Loss
-
-For each Wi-Fi fingerprint, a fraction of the **currently observed APs**
-is randomly removed.
-
-The tested loss levels are:
-
-```text
-0%
-10%
-20%
-30%
-40%
-50%
-```
-
-Dropped access points are represented as:
-
-```text
--110 dBm
-```
-
-Already-missing APs are not selected again.
-
----
-
-## RSSI Noise
-
-Gaussian perturbation is applied to observed RSSI measurements:
-
-```text
-RSSI_noisy = RSSI + ε
-```
-
-where:
-
-```text
-ε ~ N(0, σ²)
-```
-
-and:
-
-```text
-σ ∈ {0, 2, 5, 10} dB
-```
-
-Noise is applied only to observed APs.
-
-In combined experiments, noise is applied only to APs that remain visible
-after AP loss.
-
----
-
-# Robust Training
-
-Three augmentation strategies were investigated.
-
-## AP-Dropout Augmentation
-
-Training fingerprints are augmented with simulated AP-loss conditions.
-
-## RSSI-Noise Augmentation
-
-Training fingerprints are augmented with Gaussian RSSI perturbations.
-
-## Combined Augmentation
-
-Both access-point dropout and RSSI noise are introduced during training.
-
-The ablation study demonstrated that the strongest augmentation strategy
-depends on the task:
-
-```text
-Classification:
-AP-dropout augmentation
-
-Localization:
-Combined AP-dropout + RSSI-noise augmentation
-```
-
----
-
-# Evaluation Metrics
-
-## Classification
-
-The following metrics are reported:
-
-```text
-Accuracy
-Macro Precision
-Macro Recall
-Macro F1
-Confusion Matrix
-```
-
-Macro averaging gives equal importance to each building-floor class.
-
----
-
-## Localization
-
-The following metrics are reported:
-
-```text
-Coordinate MAE
-Coordinate RMSE
-Mean Euclidean localization error
-Median localization error
-90th-percentile localization error
-```
-
-The Euclidean error for sample `i` is:
-
-```text
-e_i = sqrt(
-    (x_pred - x_true)^2 +
-    (y_pred - y_true)^2
-)
-```
-
----
-
-# Statistical Analysis
-
-The final comparison uses **paired bootstrap analysis**.
-
-For corruption experiments, a hierarchical bootstrap accounts for:
-
-1. variation across corruption realizations / random seeds, and
-2. variation across held-out fingerprints.
-
-The severe-condition classification improvement was:
-
-```text
-+5.71 percentage points
-```
-
-with:
-
-```text
-95% bootstrap CI = [4.41, 7.06] percentage points
-```
-
-The clean-condition classification difference was:
-
-```text
--0.54 percentage points
-```
-
-with:
-
-```text
-95% bootstrap CI = [-1.80, 0.63] percentage points
-```
-
----
-
-# Repository Structure
-
-```text
-wifi-localization-research/
-│
-├── README.md
-├── requirements.txt
-├── research_plan.md
-├── .gitignore
-│
-├── data/
-│   ├── raw/
-│   │   ├── trainingData.csv
-│   │   └── validationData.csv
-│   │
-│   └── processed/
-│
-├── notebooks/
-│   ├── 01_dataset_exploration.ipynb
-│   ├── 02_preprocessing.ipynb
-│   ├── 03_clean_baselines.ipynb
-│   ├── 04_ap_loss_experiments.ipynb
-│   ├── 05_rssi_noise_experiments.ipynb
-│   ├── 06_combined_degradation.ipynb
-│   ├── 07_robust_training.ipynb
-│   ├── 08_final_evaluation.ipynb
-│   ├── 09_statistical_analysis.ipynb
-│   └── 10_final_figures_and_tables.ipynb
-│
-├── models/
-│   ├── 03_clean_baselines/
-│   └── 07_robust_training/
-│
-├── results/
-│   ├── csv/
-│   └── figures/
-│
-├── paper/
-│   ├── figures/
-│   ├── tables/
-│   ├── final_results_summary.txt
-│   └── publication_artifacts.csv
-│
-└── src/
-```
-
----
-
-# Notebook Workflow
-
-The notebooks should be executed sequentially.
-
-| Notebook | Purpose |
+| Operator | What it does |
 |---|---|
-| `01_dataset_exploration.ipynb` | Dataset exploration and quality analysis |
-| `02_preprocessing.ipynb` | Train/dev/test preparation and scaling |
-| `03_clean_baselines.ipynb` | KNN, Random Forest and MLP clean baselines |
-| `04_ap_loss_experiments.ipynb` | Controlled AP-loss robustness |
-| `05_rssi_noise_experiments.ipynb` | Controlled RSSI-noise robustness |
-| `06_combined_degradation.ipynb` | AP-loss × RSSI-noise experiment grid |
-| `07_robust_training.ipynb` | Robust-training augmentation and ablation |
-| `08_final_evaluation.ipynb` | Frozen held-out test evaluation |
-| `09_statistical_analysis.ipynb` | Bootstrap statistical analysis |
-| `10_final_figures_and_tables.ipynb` | Publication figures and LaTeX tables |
+| **AP loss** | Removes a fraction *p* of the APs *observed* in each fingerprint (at least one when *p* > 0) and sets them to −110 dBm. With ~18 observed APs per fingerprint, 50 % loss removes about 9 of them. |
+| **RSSI noise** | Adds N(0, σ²) to surviving observed APs only, clipped to [−104, 0] dBm. |
+| **Global AP outage** | Removes the same randomly chosen AP identities from every fingerprint, simulating a shared infrastructure failure. |
+
+**Models**
+
+| Model | Configuration |
+|---|---|
+| KNN | k = 5, distance weighting |
+| Random Forest | 300 trees, random state 42 |
+| MLP | 128 → 64 ReLU units; Adam (lr 0.001, batch 200, L2 1e-4); early stopping (patience 15, max 300 epochs); 75,789 / 75,074 parameters (classifier / regressor) |
+
+The observation mask is used only to decide which APs may be corrupted; it is never a model input.
 
 ---
 
-# Reproducing the Experiments
+## Quick start
 
-## 1. Clone the repository
-
-```bash
-git clone <YOUR-GITHUB-REPOSITORY-URL>
-cd wifi-localization-research
-```
-
----
-
-## 2. Create a virtual environment
-
-The original experiments were run using Python 3.11.
-
-### macOS / Linux
+**Requirements:** Python 3.11. The exact package versions are pinned in `requirements.txt`.
 
 ```bash
-python3.11 -m venv .envden702-wifi
-source .envden702-wifi/bin/activate
-```
+git clone https://github.com/me-nwa/robust-wifi-indoor-localization.git
+cd robust-wifi-indoor-localization
 
-### Windows
-
-```bash
-py -3.11 -m venv .envden702-wifi
-.envden702-wifi\Scripts\activate
-```
-
----
-
-## 3. Install dependencies
-
-```bash
-python -m pip install --upgrade pip
+python3.11 -m venv .venv
+source .venv/bin/activate            # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
----
-
-## 4. Download UJIIndoorLoc
-
-Download the official UJIIndoorLoc dataset from the
-**UCI Machine Learning Repository**.
-
-Place the two CSV files in:
-
-```text
-data/raw/
-```
-
-The structure should be:
+**Get the data.** Download UJIIndoorLoc from the
+[UCI Machine Learning Repository](https://archive.ics.uci.edu/dataset/310/ujiindoorloc) and place the two files here
+(the raw data is not redistributed):
 
 ```text
 data/raw/
@@ -665,381 +149,113 @@ data/raw/
 └── validationData.csv
 ```
 
----
-
-## 5. Run the notebooks
-
-Run the notebooks in numerical order:
-
-```text
-01 → 02 → 03 → 04 → 05
-   → 06 → 07 → 08 → 09 → 10
-```
-
-The official validation portion is reserved for the final held-out
-evaluation and must not be used for model selection.
-
----
-
-# Reproducibility Protocol
-
-The project follows several safeguards to reduce evaluation leakage.
-
-### Training/development separation
-
-The official UJIIndoorLoc training set is divided into:
-
-```text
-Training:     15,949 fingerprints
-Development:  3,988 fingerprints
-```
-
-The split is stratified by combined building-floor class.
-
-### Final test set
-
-The official validation set contains:
-
-```text
-1,111 fingerprints
-```
-
-and remains untouched until the frozen final evaluation.
-
-### Scaling
-
-Feature scaling is fitted using the training partition only.
-
-### Model selection
-
-Models and augmentation strategies are selected using the development set.
-
-### Final evaluation
-
-The final test set is used only after the experimental methodology is
-frozen.
-
-No additional tuning is performed after observing final-test results.
-
----
-
-# Output Files
-
-Experimental result tables are written to:
-
-```text
-results/csv/
-```
-
-Experimental plots are written to:
-
-```text
-results/figures/
-```
-
-Publication-ready figures are written to:
-
-```text
-paper/figures/
-```
-
-LaTeX-ready tables are written to:
-
-```text
-paper/tables/
-```
-
----
-
-# Publication Figures
-
-The final manuscript uses publication-quality versions of the major
-experimental figures.
-
-Examples include:
-
-```text
-fig_ap_loss_classification.pdf
-
-fig_rssi_noise_classification.pdf
-
-fig_final_classification_robustness.pdf
-
-fig_final_localization_robustness.pdf
-
-fig_accuracy_improvement_heatmap.pdf
-
-fig_localization_error_reduction_heatmap.pdf
-
-fig_classification_bootstrap_effect.pdf
-
-fig_localization_bootstrap_effect.pdf
-```
-
-These files are available under:
-
-```text
-paper/figures/
-```
-
----
-
-# Research Contributions
-
-The study makes four primary contributions.
-
-1. **Controlled robustness evaluation**
-
-   A systematic experimental framework quantifies the effects of
-   access-point loss, RSSI noise, and simultaneous degradation on
-   Wi-Fi fingerprint localization.
-
-2. **Cross-model comparison**
-
-   KNN, Random Forest, and MLP models are compared under identical clean
-   and corrupted fingerprint conditions.
-
-3. **Robustness-oriented augmentation**
-
-   AP-dropout, RSSI-noise, and combined augmentation strategies are
-   investigated as mechanisms for improving resilience.
-
-4. **Held-out statistical validation**
-
-   Final models are evaluated on an untouched held-out test set and
-   paired bootstrap confidence intervals are used to quantify the
-   robustness effects.
-
----
-
-# Main Scientific Observation
-
-The experiments indicate that:
-
-> **Access-point disappearance is a substantially stronger source of
-> degradation than moderate RSSI perturbation in the evaluated
-> Wi-Fi fingerprinting setting.**
-
-RSSI noise of σ = 10 dB produced relatively small degradation when used
-alone, whereas removing 50% of the observed access points caused much
-larger classification and localization deterioration.
-
-Robustness-oriented training substantially mitigated this degradation,
-particularly under combined AP-loss and RSSI-noise conditions.
-
----
-
-# Limitations
-
-The current study has several important limitations.
-
-- Evaluation is based on the UJIIndoorLoc benchmark.
-- Artificial corruption approximates AP disappearance and RSSI
-  perturbation rather than measuring every possible real deployment
-  failure.
-- Device heterogeneity is not independently modeled.
-- Temporal Wi-Fi infrastructure changes are not directly observed.
-- Localization errors are retained in dataset coordinate units rather
-  than being converted to meters without verified coordinate-system
-  assumptions.
-- Additional buildings and independent contemporary datasets would
-  strengthen external validity.
-
-These limitations motivate future evaluation using live and longitudinal
-Wi-Fi deployments.
-
----
-
-# Future Work
-
-Potential extensions include:
-
-- validation on additional indoor-localization benchmarks,
-- longitudinal Wi-Fi fingerprint collection,
-- device-independent robustness evaluation,
-- reliability-aware AP weighting,
-- uncertainty-aware localization,
-- self-supervised fingerprint representation learning,
-- domain adaptation across buildings,
-- hybrid Wi-Fi / BLE / inertial localization,
-- and real-time mobile deployment studies.
-
----
-
-# Academic Context
-
-This repository accompanies the research study:
-
-> **Robust Wi-Fi Fingerprint-Based Indoor Localization Under Access-Point
-> Loss and RSSI Noise**
-
-The work was prepared as an original PhD-level research project for
-**DEN702 — Advanced Research Communication** at **Abu Dhabi University**.
-
-The experimental pipeline and final evaluation were frozen before the
-manuscript was finalized.
-
----
-
-# Research Paper
-
-The manuscript reports:
-
-- problem formulation,
-- related work and research gap,
-- mathematical corruption models,
-- machine-learning methodology,
-- robustness augmentation,
-- baseline experiments,
-- ablation analysis,
-- held-out evaluation,
-- bootstrap statistical analysis,
-- limitations,
-- and future research directions.
-
-The final paper source is maintained separately in Overleaf.
-
----
-
-# Citation
-
-If you use this repository or build on the experimental framework, please
-cite the corresponding research paper once publication details become
-available.
-
-For now:
-
-```bibtex
-@unpublished{wifi_localization_robustness_2026,
-  title  = {Robust Wi-Fi Fingerprint-Based Indoor Localization
-            Under Access-Point Loss and RSSI Noise},
-  author = {YOUR FULL NAME},
-  year   = {2026},
-  note   = {PhD research project, Abu Dhabi University}
-}
-```
-
-Replace `YOUR FULL NAME` with the final author name before publishing the
-repository.
-
----
-
-# Repository Versioning
-
-The code corresponding to the submitted research paper should be preserved
-using a Git tag.
-
-Recommended release:
+**Run.** Execute the notebooks in numerical order with Jupyter:
 
 ```bash
-git tag -a v1.0-den702-paper \
-  -m "Code and results used for DEN702 research paper"
-
-git push origin v1.0-den702-paper
+jupyter lab
 ```
-
-Recommended release title:
 
 ```text
-DEN702 Research Paper — Reproducibility Release v1.0
+01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10      primary study
+11 → 12 → 13                                          reviewer-requested controls
 ```
 
-This preserves the exact experimental version even if the repository is
-extended later.
+Notebooks 11–13 reuse the processed data and models produced by Notebooks 02, 03 and 07.
 
 ---
 
-# Data Availability
+## Notebook guide
 
-The project relies on the publicly available **UJIIndoorLoc** benchmark.
+| Notebook | Stage | Purpose |
+|---|---|---|
+| `01_dataset_exploration` | Data | Sparsity, AP visibility and label structure |
+| `02_preprocessing` | Data | Missing-AP encoding, stratified train/dev split, scaling |
+| `03_clean_baselines` | Baselines | KNN, Random Forest and MLP on clean input |
+| `04_ap_loss_experiments` | Degradation | Detected-AP loss from 0 % to 50 % |
+| `05_rssi_noise_experiments` | Degradation | Gaussian RSSI noise from σ = 0 to 10 dB |
+| `06_robust_training` | Degradation | Combined AP-loss × RSSI-noise grid |
+| `07_final_analysis` | Robust training | Augmentation regimes and development-set ablation |
+| `08_final_evaluation` | Final test | Frozen held-out evaluation over the full grid |
+| `09_statistical_analysis` | Statistics | Paired bootstrap for the severe condition |
+| `10_final_figures_and_tables` | Publication | Paper figures and LaTeX tables |
+| `11_equal_volume_control` | Review | Equal-volume repeated-clean control (MLP) |
+| `12_random_forest_robust_training` | Review | Augmentation applied to Random Forest |
+| `13_extended_robustness_analysis` | Review | 20 seeds, global AP outages, confusion matrices, spatial error maps |
 
-The raw benchmark should be obtained from its official repository rather
-than redistributed unnecessarily in this GitHub repository.
+---
 
-Users should place the downloaded files under:
+## Repository structure
 
 ```text
-data/raw/
+robust-wifi-indoor-localization/
+├── data/
+│   ├── raw/                 # UJIIndoorLoc CSVs (download separately)
+│   └── processed/           # regenerated by Notebook 02
+├── models/                  # trained models (regenerated by the notebooks)
+├── notebooks/               # 01–13, run in order
+├── results/
+│   ├── csv/                 # every table, per-seed result and metadata file
+│   └── figures/             # exploratory and diagnostic plots
+├── paper/
+│   ├── figures/             # publication figures (PDF)
+│   └── tables/              # LaTeX tables
+├── requirements.txt
+└── research_plan.md
 ```
 
-Processed data can then be regenerated using:
+---
 
-```text
-02_preprocessing.ipynb
-```
+## Reproducibility protocol
+
+- **No test leakage in model selection.** The official validation file is the final test set. Models and
+  augmentation regimes were selected on a stratified development split of the training file only.
+- **Training-only preprocessing.** The RSSI scaler and coordinate scaler are fitted on the training subset.
+- **Fixed seeds.** Split and models use random state 42. Corruption seeds are 42–46 (primary analysis) and 42–61
+  (20-seed analysis). Augmentation seeds are 142 and 242.
+- **Leakage-safe early stopping in the controls.** Notebook 11 fixes the early-stopping subset *before*
+  augmentation, so a fingerprint and its corrupted copies never sit on opposite sides of the split.
+- **Recorded provenance.** Training times, software versions and platform details are saved in
+  `results/csv/11_training_summary.csv`, `results/csv/12_rf_training_summary.csv` and
+  `results/csv/13_reproducibility_metadata.json`.
+- **Post-hoc disclosure.** Notebooks 11–13 were run after the frozen test evaluation. They are sensitivity
+  analyses, not new confirmatory tests. Further tuning against the same 1,111-fingerprint test set is discouraged;
+  new hypotheses should be checked on new data.
 
 ---
 
-# Code Availability
+## Limitations
 
-All code required to reproduce preprocessing, baseline training,
-robustness experiments, augmentation studies, held-out evaluation,
-statistical analysis, and publication figures is provided in this
-repository.
-
-The notebooks intentionally preserve the complete experimental sequence so
-that the relationship between model development and final evaluation is
-auditable.
+- **Single benchmark.** The study uses only UJIIndoorLoc; replication on independent datasets is future work.
+- **Synthetic failures.** Corruptions are simulated. Spatial AP coverage, network topology, device offsets,
+  temporal drift and fading below receiver sensitivity are not modelled.
+- **Conditional uncertainty.** Confidence intervals describe uncertainty within this test set and corruption
+  process, not across buildings, devices or real deployments.
+- **Units.** Errors are in dataset coordinate units, not verified meters.
 
 ---
 
-# Responsible Reproducibility
+## Citation
 
-The final-test results in this repository must not be interpreted as a
-development benchmark.
+The accompanying paper is currently under review. Citation details will be added here once it is published.
+Until then, please reference this repository by its URL:
+`https://github.com/me-nwa/robust-wifi-indoor-localization`.
 
-The final evaluation was frozen after model selection.
+**Releases.** `v1.0-den702-paper` is the original submission. Tag the reviewed version as well, so each paper
+version maps to an exact commit.
 
-Any subsequent model modifications should therefore be treated as a
-**new experiment** rather than used to retroactively modify the reported
-results.
-
----
-
-# License
-
-A software license should be selected before making the repository public.
-
-For academic research code, commonly used options include:
-
-```text
-MIT License
-Apache License 2.0
-BSD 3-Clause License
-```
-
-The license selected for this repository should apply only to original
-code and should not override the terms associated with third-party
-datasets or external resources.
+**Dataset.** If you use UJIIndoorLoc, please also cite: J. Torres-Sospedra *et al.*, "UJIIndoorLoc: A new
+multi-building and multi-floor database for WLAN fingerprint-based indoor localization problems,"
+*IPIN 2014*, pp. 261–270, doi:[10.1109/IPIN.2014.7275492](https://doi.org/10.1109/IPIN.2014.7275492).
 
 ---
 
-# Contact
+## License
 
-**Author:** YOUR FULL NAME  
-**Program:** PhD in Intelligent Systems Engineering  
-**Institution:** Abu Dhabi University  
-**Location:** Abu Dhabi, United Arab Emirates  
-**Email:** YOUR ACADEMIC EMAIL
+The code in this repository is released under the [MIT License](LICENSE). The UJIIndoorLoc dataset is subject to
+its own terms and is not redistributed here.
 
----
+## Contact
 
-## Project Status
+Questions and issues: please open a [GitHub issue](https://github.com/me-nwa/robust-wifi-indoor-localization/issues).
 
-```text
-Dataset preparation             ✅ Complete
-Clean baseline experiments      ✅ Complete
-AP-loss experiments             ✅ Complete
-RSSI-noise experiments          ✅ Complete
-Combined degradation            ✅ Complete
-Robust-training ablation        ✅ Complete
-Held-out final evaluation       ✅ Complete
-Bootstrap statistical analysis  ✅ Complete
-Publication figures/tables      ✅ Complete
-Research paper                  ✅ Prepared
-```
-
-**Experimental pipeline status: FROZEN**
-
-No additional model tuning should be performed using the held-out test
-results.
+<sub>Prepared as part of DEN702 — Advanced Research Communication, Abu Dhabi University.</sub>
