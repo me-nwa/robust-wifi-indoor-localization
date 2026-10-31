@@ -354,7 +354,7 @@ its own terms and is not redistributed here.
 
 Questions and issues: please open a [GitHub issue](https://github.com/me-nwa/robust-wifi-indoor-localization/issues).
 
-**Author:** Aamena Mohamed AlShehyari  
+**Author:** Aamena Mohamed   
 **Institution:** Abu Dhabi University  
 **Program:** PhD in Intelligent Systems Engineering  
 
